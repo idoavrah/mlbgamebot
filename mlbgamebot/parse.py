@@ -144,6 +144,9 @@ def start():
 def daily(parseDay=None):
 
     try:
+
+        logger.info("Start daily")
+
         if not parseDay:
             parseDay = datetime.date.today() - datetime.timedelta(days=1)
 
@@ -152,7 +155,7 @@ def daily(parseDay=None):
             return
 
         tz = timezone('EST')
-        if datetime.datetime.now(tz).hour >= 8:
+        if datetime.datetime.now(tz).hour < 8:
             return
 
         files = glob.glob(
@@ -182,6 +185,8 @@ def daily(parseDay=None):
 
     except Exception as e:
         logger.error(e)
+
+    logger.info("Done daily")
 
 
 logger.info('Loaded parse')
