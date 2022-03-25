@@ -1,14 +1,19 @@
-import datetime
 import tweepy
 import os
 import io
 import logging
 import setup  # pylint: disable=unused-import
-from setup import TWITTER_HANDLES
+from setup import TWITTER_HANDLES, TEAM_ABBREVIATIONS
 from PIL import ImageFont, Image, ImageDraw
 import plotly.graph_objects as go
 
 logger = logging.getLogger()
+
+auth = tweepy.OAuthHandler(
+    os.getenv("TWITTER_API_KEY"), os.getenv("TWITTER_API_KEY_SECRET"))
+auth.set_access_token(os.getenv("TWITTER_BOT_ACCESS_TOKEN"),
+                      os.getenv("TWITTER_BOT_ACCESS_TOKEN_SECRET"))
+api = tweepy.API(auth)
 
 
 def createGauge(defenseScore, offenseScore, thrillScore):
@@ -73,7 +78,7 @@ def createGauge(defenseScore, offenseScore, thrillScore):
     return io.BytesIO(gauge.to_image(format="png"))
 
 
-def createImage(gamedate, away, home, defenseScore, offenseScore, thrillScore):
+def createGameImage(gamedate, away, home, defenseScore, offenseScore, thrillScore):
     '''Creates image to be used with tweets'''
 
     myImage = Image.new(mode="RGB", size=(600, 400))
@@ -99,18 +104,52 @@ def createImage(gamedate, away, home, defenseScore, offenseScore, thrillScore):
     return myImage
 
 
-def tweet(filename, image, gamedate, away, home):
+def createDailySummaryImage(gamedate, games):
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=games["defenseScore"],
+        y=games["offenseScore"],
+        mode='markers, text',
+        text=games['homeTeam'] + ' @ ' + games['awayTeam'],
+        textposition="bottom center",
+        marker=dict(
+            size=games["thrillScore"]*6,
+            color=games["thrillScore"],
+            line=dict(width=1, color='DarkSlateGrey'),
+            colorscale='Rainbow',
+            showscale=True
+        )
+    ))
+
+    fig.update_layout(width=1000, height=1000,
+                      paper_bgcolor='rgb(200, 200, 200)',
+                      title_font_size=30,
+                      font_size=16,
+                      title_text=f'Gameday: {gamedate.year}-{gamedate.month:02d}-{gamedate.day:02d}',
+                      xaxis_title="Defense Score",
+                      yaxis_title="Offense Score")
+
+    fig.update_xaxes(zeroline=False, title_font=dict(size=30), showgrid=False)
+    fig.update_yaxes(zeroline=False, title_font=dict(size=30), showgrid=False)
+
+    return fig
+
+
+def tweetGame(filename, gamedate, away, home):
     '''Tweets results'''
 
-    auth = tweepy.OAuthHandler(
-        os.getenv("TWITTER_API_KEY"), os.getenv("TWITTER_API_KEY_SECRET"))
-    auth.set_access_token(os.getenv("TWITTER_BOT_ACCESS_TOKEN"), os.getenv(
-        "TWITTER_BOT_ACCESS_TOKEN_SECRET"))
-    api = tweepy.API(auth)
-
-    tweetStr = f'{gamedate:%d-%b-%Y}: {TWITTER_HANDLES[away]} at {TWITTER_HANDLES[home]}'
-
-    media = api.media_upload(filename)
-    
     logger.info(f'Tweeting about game {filename}')
+    tweetStr = f'#MLB {gamedate:%d-%b-%Y}: {TWITTER_HANDLES[away]} @ {TWITTER_HANDLES[home]}'
+    media = api.media_upload(filename)
+    api.update_status(status=tweetStr, media_ids=[media.media_id])
+
+
+def tweetDailySummary(gamedate, filename):
+    '''Tweets daily summary'''
+
+    logger.info(f'Tweeting about day {gamedate}')
+    tweetStr = f'#MLB scores for {gamedate:%d-%b-%Y}'
+    media = api.media_upload(filename)
     api.update_status(status=tweetStr, media_ids=[media.media_id])

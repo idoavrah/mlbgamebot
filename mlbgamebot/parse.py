@@ -1,13 +1,18 @@
+from email.utils import parsedate
+from unittest.result import failfast
 from numpy import sign
-from setup import fromdate, todate
-from tweet import createImage, tweet
+from setup import fromdate, todate, TEAM_ABBREVIATIONS
+from jsonpath_ng import jsonpath, parse
+from pytz import timezone
+import tweet
 import datetime
 import evaluate
 import logging
+import glob
 import os
 import json
 import pandas as pd
-from jsonpath_ng import jsonpath, parse
+import feather as ftr
 import pyarrow.feather as feather
 
 logger = logging.getLogger()
@@ -122,21 +127,65 @@ def start():
                         os.makedirs(os.path.dirname(filename), exist_ok=True)
                         feather.write_feather(gameDF, filename)
 
-                        image = createImage(gamedate, game["teams"]["away"]["team"]["name"], game["teams"]["home"]["team"]["name"], scores[0], scores[1], scores[2])
+                        image = tweet.createGameImage(gamedate, game["teams"]["away"]["team"]["name"],
+                                                      game["teams"]["home"]["team"]["name"], scores[0], scores[1], scores[2])
                         filename = f'data/parsed/{year}/{year}-{month:02d}-{day:02d}-{gamepk}.png'
                         image.save(filename)
-                        
-                        tweet(filename, image, gamedate, game["teams"]["away"]["team"]["name"], game["teams"]["home"]["team"]["name"])
+
+                        tweet.tweetGame(
+                            filename, gamedate, game["teams"]["away"]["team"]["name"], game["teams"]["home"]["team"]["name"])
 
         except Exception as e:
-            print(filename)
             logger.error(e)
 
     logger.info("Done parse")
+
+
+def daily(parseDay=None):
+
+    try:
+        if not parseDay:
+            parseDay = datetime.date.today() - datetime.timedelta(days=1)
+
+        filename = f'data/schedule/{parseDay.year}/{parseDay.year}-{parseDay.month:02d}-{parseDay.day:02d}.png'
+        if os.path.isfile(filename):
+            return
+
+        tz = timezone('EST')
+        if datetime.datetime.now(tz).hour >= 8:
+            return
+
+        files = glob.glob(
+            f'data/parsed/{parseDay.year}/{parseDay.year}-{parseDay.month:02d}-{parseDay.day:02d}*.ftr')
+
+        if not files:
+            return
+
+        li = []
+
+        for gamefile in files:
+            df = ftr.read_dataframe(gamefile)
+            li.append(df)
+
+        total = pd.concat(li)
+
+        games = total[["homeTeam", "awayTeam", "gamePk", "defenseScore", "offenseScore", "thrillScore"]
+                      ].drop_duplicates().replace({"homeTeam": TEAM_ABBREVIATIONS, "awayTeam": TEAM_ABBREVIATIONS})
+
+        games[["defenseScore", "offenseScore", "thrillScore"]] = games[["defenseScore", "offenseScore", "thrillScore"]].clip(
+            lower=0, upper=10)
+
+        image = tweet.createDailySummaryImage(parseDay, games)
+        image.write_image(filename)
+
+        tweet.tweetDailySummary(parseDay, filename)
+
+    except Exception as e:
+        logger.error(e)
 
 
 logger.info('Loaded parse')
 
 
 if __name__ == "__main__":
-    start()
+    daily()

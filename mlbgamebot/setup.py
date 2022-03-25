@@ -45,6 +45,39 @@ TWITTER_HANDLES = {'Los Angeles Angels': "#Angels",
                    'New York Yankees': "#Yankees"}
 
 
+TEAM_ABBREVIATIONS = {'Los Angeles Angels': "LAA",
+                      'Houston Astros': "HOU",
+                      'Oakland Athletics': "OAK",
+                      'Toronto Blue Jays': "TOR",
+                      'Atlanta Braves': "ATL",
+                      'Milwaukee Brewers': "MIL",
+                      'St. Louis Cardinals': "STL",
+                      'Chicago Cubs': "CHC",
+                      'Arizona Diamondbacks': "ARI",
+                      'Los Angeles Dodgers': "LAD",
+                      'San Francisco Giants': "SF",
+                      'Cleveland Guardians': "CLE",
+                      'Cleveland Indians': "CLE",
+                      'Seattle Mariners': "SEA",
+                      'Miami Marlins': "MIA",
+                      'New York Mets': "NYM",
+                      'Washington Nationals': "WAS",
+                      'Baltimore Orioles': "BAL",
+                      'San Diego Padres': "SD",
+                      'Philadelphia Phillies': "PHI",
+                      'Pittsburgh Pirates': "PIT",
+                      'Texas Rangers': "TEX",
+                      'Tampa Bay Rays': "TB",
+                      'Boston Red Sox': "BOS",
+                      'Cincinnati Reds': "CIN",
+                      'Colorado Rockies': "COL",
+                      'Kansas City Royals': "KC",
+                      'Detroit Tigers': "DET",
+                      'Minnesota Twins': "MIN",
+                      'Chicago White Sox': "CHW",
+                      'New York Yankees': "NYY"}
+
+
 def init():
 
     logger.info('Start init')
