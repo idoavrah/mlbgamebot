@@ -155,7 +155,7 @@ def daily(parseDay=None):
             return
 
         tz = timezone('EST')
-        if datetime.datetime.now(tz).hour < 11:
+        if datetime.datetime.now(tz).hour != 11:
             return
 
         files = glob.glob(
