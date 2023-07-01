@@ -9,6 +9,6 @@ RUN pip install -r requirements.txt
 COPY mlbgamebot ./mlbgamebot
 COPY images ./images
 
-USER ubuntu
+USER 1001
 
 CMD ["python", "mlbgamebot/gamebot.py"]
