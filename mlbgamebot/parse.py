@@ -11,6 +11,7 @@ import logging
 import glob
 import os
 import json
+import asyncio
 import pandas as pd
 import feather as ftr
 import pyarrow.feather as feather
@@ -18,7 +19,7 @@ import pyarrow.feather as feather
 logger = logging.getLogger()
 
 
-def start():
+async def start():
 
     logger.info("Start parse")
 
@@ -132,7 +133,7 @@ def start():
                         filename = f'data/parsed/{year}/{year}-{month:02d}-{day:02d}-{gamepk}.png'
                         image.save(filename)
 
-                        tweet.tweetGame(
+                        await tweet.tweetGame(
                             filename, gamedate, game["teams"]["away"]["team"]["name"], game["teams"]["home"]["team"]["name"])
 
         except Exception as e:
@@ -141,7 +142,7 @@ def start():
     logger.info("Done parse")
 
 
-def daily(parseDay=None):
+async def daily(parseDay=None):
 
     try:
 
@@ -181,13 +182,12 @@ def daily(parseDay=None):
         image = tweet.createDailySummaryImage(parseDay, games)
         image.write_image(filename)
 
-        tweet.tweetDailySummary(parseDay, filename)
+        await tweet.tweetDailySummary(parseDay, filename)
 
     except Exception as e:
         logger.error(e)
 
     logger.info("Done daily")
-
 
 logger.info('Loaded parse')
 

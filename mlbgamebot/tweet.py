@@ -1,20 +1,17 @@
-import tweepy
 import os
 import io
 import logging
 import setup  # pylint: disable=unused-import
+import asyncio
+import plotly.graph_objects as go
 from setup import TWITTER_HANDLES, TEAM_ABBREVIATIONS
 from PIL import ImageFont, Image, ImageDraw
-import plotly.graph_objects as go
+from telegram import Bot
 
 logger = logging.getLogger()
 
-auth = tweepy.OAuthHandler(
-    os.getenv("TWITTER_API_KEY"), os.getenv("TWITTER_API_KEY_SECRET"))
-auth.set_access_token(os.getenv("TWITTER_BOT_ACCESS_TOKEN"),
-                      os.getenv("TWITTER_BOT_ACCESS_TOKEN_SECRET"))
-api = tweepy.API(auth)
-
+bot_token = os.getenv('TELEGRAM_BOT_API_TOKEN')
+channel_id = os.getenv('TELEGRAM_CHANNEL')
 
 def createGauge(defenseScore, offenseScore, thrillScore):
     '''Creates gauges to be used with tweets'''
@@ -103,8 +100,7 @@ def createGameImage(gamedate, away, home, defenseScore, offenseScore, thrillScor
 
     return myImage
 
-
-def createDailySummaryImage(gamedate, games):
+async def createDailySummaryImage(gamedate, games):
 
     fig = go.Figure()
 
@@ -137,19 +133,23 @@ def createDailySummaryImage(gamedate, games):
     return fig
 
 
-def tweetGame(filename, gamedate, away, home):
+async def tweetGame(filename, gamedate, away, home):
     '''Tweets results'''
-
+    
     logger.info(f'Tweeting about game {filename}')
-    tweetStr = f'#MLB {gamedate:%d-%b-%Y}: {TWITTER_HANDLES[away]} @ {TWITTER_HANDLES[home]}'
-    media = api.media_upload(filename)
-    api.update_status(status=tweetStr, media_ids=[media.media_id])
+    caption = f'#MLB {gamedate:%d-%b-%Y}: {TWITTER_HANDLES[away]} @ {TWITTER_HANDLES[home]}'
+
+    bot = Bot(token=bot_token)
+    with open(filename, 'rb') as image_file:
+        await bot.send_photo(chat_id=channel_id, photo=image_file, caption=caption)
 
 
-def tweetDailySummary(gamedate, filename):
+async def tweetDailySummary(gamedate, filename):
     '''Tweets daily summary'''
 
     logger.info(f'Tweeting about day {gamedate}')
-    tweetStr = f'#MLB scores for {gamedate:%d-%b-%Y}'
-    media = api.media_upload(filename)
-    api.update_status(status=tweetStr, media_ids=[media.media_id])
+    caption = f'#MLB scores for {gamedate:%d-%b-%Y}'
+
+    bot = Bot(token=bot_token)
+    with open(filename, 'rb') as image_file:
+        await bot.send_photo(chat_id=channel_id, photo=image_file, caption=caption)

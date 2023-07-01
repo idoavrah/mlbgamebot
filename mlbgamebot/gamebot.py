@@ -1,7 +1,9 @@
 import sync
 import parse
+import asyncio
 
 if __name__ == "__main__":
+
     sync.start()
-    parse.start()
-    parse.daily()
+    asyncio.run(parse.start())
+    asyncio.run(parse.daily())
