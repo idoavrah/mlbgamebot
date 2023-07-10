@@ -153,16 +153,19 @@ async def daily(parseDay=None):
 
         filename = f'data/schedule/{parseDay.year}/{parseDay.year}-{parseDay.month:02d}-{parseDay.day:02d}.png'
         if os.path.isfile(filename):
+            logger.info("Already tweeted daily summary, file exists")
             return
 
-        tz = timezone('EST')
-        if datetime.datetime.now(tz).hour != 11:
+        hour = datetime.datetime.now(timezone('EST')).hour
+        if hour != 11:
+            logger.info(f'Not the time to tweet the daily summary ({hour})')
             return
 
         files = glob.glob(
             f'data/parsed/{parseDay.year}/{parseDay.year}-{parseDay.month:02d}-{parseDay.day:02d}*.ftr')
 
         if not files:
+            logger.info("No games for daily summary")
             return
 
         li = []
@@ -176,10 +179,9 @@ async def daily(parseDay=None):
         games = total[["homeTeam", "awayTeam", "gamePk", "defenseScore", "offenseScore", "thrillScore"]
                       ].drop_duplicates().replace({"homeTeam": TEAM_ABBREVIATIONS, "awayTeam": TEAM_ABBREVIATIONS})
 
-        games[["defenseScore", "offenseScore", "thrillScore"]] = games[["defenseScore", "offenseScore", "thrillScore"]].clip(
-            lower=0, upper=10)
+        games[["defenseScore", "offenseScore", "thrillScore"]] = games[["defenseScore", "offenseScore", "thrillScore"]].clip(lower=0, upper=10)
 
-        image = tweet.createDailySummaryImage(parseDay, games)
+        image = await tweet.createDailySummaryImage(parseDay, games)
         image.write_image(filename)
 
         await tweet.tweetDailySummary(parseDay, filename)

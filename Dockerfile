@@ -9,6 +9,8 @@ RUN pip install -r requirements.txt
 COPY mlbgamebot ./mlbgamebot
 COPY images ./images
 
-USER 1001
+RUN mkdir /app/data && groupadd -r user && useradd -r -g user user && chown -R user:user /app
+
+USER user
 
 CMD ["python", "mlbgamebot/gamebot.py"]
