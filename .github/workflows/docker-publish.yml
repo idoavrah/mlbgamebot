@@ -45,4 +45,4 @@ jobs:
       - name: Pull Docker image
         run: |
           whoami
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          sudo docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
