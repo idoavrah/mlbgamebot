@@ -41,6 +41,7 @@ jobs:
 
   pull:
     runs-on: self-hosted
+    needs: build
     steps:
       - name: Pull Docker image
         run: |
