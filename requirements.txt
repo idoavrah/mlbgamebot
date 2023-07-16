@@ -3,7 +3,7 @@ kaleido
 numpy
 pandas
 requests
-Pillow
+Pillow==9.4.0
 plotly
 plotly-express
 python-dotenv
