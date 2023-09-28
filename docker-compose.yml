@@ -4,6 +4,7 @@ services:
   telegram-bot:
     image: bot
     restart: always
+    user: root
     env_file:
       - .env
     volumes:
