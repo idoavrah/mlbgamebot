@@ -38,12 +38,3 @@ jobs:
           context: .
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           push: true
-
-  # pull:
-  #   runs-on: self-hosted
-  #   needs: build
-  #   steps:
-  #     - name: Pull Docker image
-  #       run: |
-  #         whoami
-  #         docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
