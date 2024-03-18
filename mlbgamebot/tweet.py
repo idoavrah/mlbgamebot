@@ -80,12 +80,15 @@ def createGameImage(gamedate, away, home, defenseScore, offenseScore, thrillScor
 
     myImage = Image.new(mode="RGB", size=(600, 400))
 
-    homeImg = Image.open(f'images/{home}.png')
-    awayImg = Image.open(f'images/{away}.png')
+    try:
+        homeImg = Image.open(f'images/{home}.png')
+        awayImg = Image.open(f'images/{away}.png')
+        myImage.paste(awayImg.resize((140, 140)), (80, 70))
+        myImage.paste(homeImg.resize((140, 140)), (380, 70))
+    except FileNotFoundError:
+        pass
+    
     gauge = Image.open(createGauge(defenseScore, offenseScore, thrillScore))
-
-    myImage.paste(awayImg.resize((140, 140)), (80, 70))
-    myImage.paste(homeImg.resize((140, 140)), (380, 70))
     myImage.paste(gauge.resize((600, 150)), (40, 220))
 
     titleStr = f'{gamedate:%d-%b-%Y}'
@@ -135,14 +138,15 @@ async def createDailySummaryImage(gamedate, games):
 
 async def tweetGame(filename, gamedate, away, home):
     '''Tweets results'''
-    
-    logger.info(f'Tweeting about game {filename}')
-    caption = f'#MLB {gamedate:%d-%b-%Y}: {TWITTER_HANDLES[away]} @ {TWITTER_HANDLES[home]}'
+    try:
+        logger.info(f'Tweeting about game {filename}')
+        caption = f'#MLB {gamedate:%d-%b-%Y}: {TWITTER_HANDLES[away]} @ {TWITTER_HANDLES[home]}'
 
-    bot = Bot(token=bot_token)
-    with open(filename, 'rb') as image_file:
-        await bot.send_photo(chat_id=channel_id, photo=image_file, caption=caption)
-
+        bot = Bot(token=bot_token)
+        with open(filename, 'rb') as image_file:
+            await bot.send_photo(chat_id=channel_id, photo=image_file, caption=caption)
+    except Exception as e:
+        logger.error(f'Error tweeting game: {e}')
 
 async def tweetDailySummary(gamedate, filename):
     '''Tweets daily summary'''
