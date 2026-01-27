@@ -1,12 +1,9 @@
 asyncio
-kaleido
 numpy
 pandas
 requests
-Pillow==9.4.0
-plotly
-plotly-express
 python-dotenv
-python-telegram-bot
 jsonpath-ng
 feather-format
+aiohttp
+backoff

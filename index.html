@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MLB Game Bot - 2025 Data</title>
+    <link rel="stylesheet" href="style.css?v=3" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="dark-mode">
+    <div class="container">
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>MLB Game Bot Explorer</h1>
+                <p class="subtitle">2025 Regular Season & Postseason Data</p>
+            </div>
+            <div class="header-controls">
+                <div class="date-picker-container">
+                    <button id="prev-btn" class="nav-btn" title="Previous Day">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <input type="date" id="date-picker">
+                    <button id="next-btn" class="nav-btn" title="Next Day">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+                <button id="global-peek-btn" class="global-peek-btn" title="Toggle Scores" aria-label="Toggle Scores">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Pagination removed, replaced by date picker -->
+
+      <main id="game-list">
+        <!-- Games for the selected date will be injected here -->
+        <div class="loader">
+          <div class="spinner"></div>
+          <p>Loading games...</p>
+        </div>
+      </main>
+
+        <template id="game-card-template">
+            <div class="game-card">
+                
+                <div class="game-content">
+                    <!-- Home Team (Left) -->
+                    <div class="team-block home-block">
+                        <div class="logo-wrapper">
+                            <img class="team-logo home-logo" src="" alt="Home Team">
+                            <div class="team-score home-score"></div>
+                        </div>
+                        <div class="team-name home-name"></div>
+                    </div>
+
+                    <!-- Center Separator -->
+                    <div class="matchup-separator">@</div>
+
+                    <!-- Away Team (Right) -->
+                    <div class="team-block away-block">
+                        <div class="logo-wrapper">
+                            <img class="team-logo away-logo" src="" alt="Away Team">
+                            <div class="team-score away-score"></div>
+                        </div>
+                        <div class="team-name away-name"></div>
+                    </div>
+                </div>
+
+                <div class="game-meta">
+                    <div class="series-description"></div>
+                    <div class="game-info-text"></div>
+                    <div class="game-venue"></div>
+                </div>
+
+                <div class="game-metrics">
+                    <div class="metric">
+                        <span class="label">Thrill</span>
+                        <div class="gauge-wrapper">
+                            <div class="gauge-track">
+                                <div class="gauge-fill thrill-fill"></div>
+                            </div>
+                        </div>
+                        <span class="value thrill-value"></span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Offense</span>
+                        <div class="gauge-wrapper">
+                            <div class="gauge-track">
+                                <div class="gauge-fill offense-fill"></div>
+                            </div>
+                        </div>
+                        <span class="value offense-value"></span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Defense</span>
+                        <div class="gauge-wrapper">
+                            <div class="gauge-track">
+                                <div class="gauge-fill defense-fill"></div>
+                            </div>
+                        </div>
+                        <span class="value defense-value"></span>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+      <footer>
+        <p>&copy; 2026 MLB Game Bot Details</p>
+      </footer>
+    </div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
