@@ -1,8 +1,10 @@
 import { tableFromIPC } from 'https://cdn.jsdelivr.net/npm/apache-arrow@18.0.0/+esm';
+import { FavoritesManager } from './favorites.js';
 
 let manifest = {};
 let dates = [];
 let currentDate = "";
+const favoritesManager = new FavoritesManager();
 
 const datePicker = document.getElementById("date-picker");
 const globalPeekBtn = document.getElementById("global-peek-btn");
@@ -11,7 +13,89 @@ const nextBtn = document.getElementById("next-btn");
 const gameList = document.getElementById("game-list");
 const template = document.getElementById("game-card-template");
 
+// Favorites UI Elements
+const favoritesBtn = document.getElementById("favorites-btn");
+const favoritesMenu = document.getElementById("favorites-menu");
+const favoritesList = document.getElementById("favorites-list");
+
+function initFavoritesUI() {
+    // Populate list
+    const teams = favoritesManager.getAllTeams();
+    favoritesList.innerHTML = '';
+    
+    teams.forEach(team => {
+        const div = document.createElement("div");
+        div.className = "fav-item";
+        
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `fav-${team.replace(/\s+/g, '-')}`;
+        checkbox.checked = favoritesManager.isFavorite(team);
+        
+        const label = document.createElement("label");
+        label.htmlFor = checkbox.id;
+        label.textContent = team;
+        
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        favoritesList.appendChild(div);
+        
+        // Interaction
+        const toggle = () => {
+            favoritesManager.toggleFavorite(team);
+            checkbox.checked = favoritesManager.isFavorite(team); // Ensure state
+            updateFavoritesBtnState();
+            // Re-render games if we are viewing them to update sort order
+            updateUI(false); 
+        };
+
+        checkbox.addEventListener("change", (e) => {
+            e.stopPropagation(); // Prevent double trigger if div has click
+            toggle();
+        });
+        
+        // Allow clicking the row too
+        div.addEventListener("click", (e) => {
+            if (e.target !== checkbox && e.target !== label) {
+                checkbox.checked = !checkbox.checked;
+                toggle();
+            }
+        });
+    });
+
+    // Toggle Menu
+    favoritesBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        favoritesMenu.classList.toggle("hidden");
+    });
+
+    // Body click closes menu
+    document.body.addEventListener("click", (e) => {
+        if (!favoritesMenu.contains(e.target) && e.target !== favoritesBtn && !favoritesBtn.contains(e.target)) {
+            favoritesMenu.classList.add("hidden");
+        }
+    });
+
+    // Stop propagation inside menu
+    favoritesMenu.addEventListener("click", (e) => {
+        e.stopPropagation();
+    });
+
+    updateFavoritesBtnState();
+}
+
+function updateFavoritesBtnState() {
+    const hasFavorites = favoritesManager.getFavorites().length > 0;
+    if (hasFavorites) {
+        favoritesBtn.classList.add("active");
+    } else {
+        favoritesBtn.classList.remove("active");
+    }
+}
+
 async function init() {
+  initFavoritesUI();
+
   try {
     const response = await fetch("data/games.json");
     manifest = await response.json();
@@ -128,6 +212,10 @@ async function updateUI(shouldPushState = false) {
 
   // Clear current list and show loader
   gameList.innerHTML = '';
+  // Re-add loader manually if needed or just wait for renderGames to clear it
+  gameList.innerHTML = `
+        <div class="loader">
+        </div>`;
 
   const gameFiles = manifest[date];
   
@@ -148,6 +236,18 @@ async function updateUI(shouldPushState = false) {
         gamesData.push(lastRow);
       }
     }
+
+    // Sort: Favorites First
+    gamesData.sort((a, b) => {
+        const aFav = favoritesManager.isFavorite(a.homeTeam) || favoritesManager.isFavorite(a.awayTeam);
+        const bFav = favoritesManager.isFavorite(b.homeTeam) || favoritesManager.isFavorite(b.awayTeam);
+        
+        if (aFav && !bFav) return -1;
+        if (!aFav && bFav) return 1;
+        
+        // Secondary sort: maybe by thrill score? Defaulting to original order (often time/id based)
+        return 0;
+    });
 
     renderGames(gamesData);
   } catch (error) {
@@ -187,6 +287,12 @@ function renderGames(games) {
   games.forEach((game, index) => {
     const clone = template.content.cloneNode(true);
     
+    // Check if favorite game
+    const isFav = favoritesManager.isFavorite(game.homeTeam) || favoritesManager.isFavorite(game.awayTeam);
+    if (isFav) {
+        clone.querySelector(".game-card").classList.add("favorite-game");
+    }
+
     // Meta Data
     const seriesDesc = game.seriesDescription || "Regular Season";
     clone.querySelector(".series-description").textContent = seriesDesc;

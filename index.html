@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MLB Game Bot - 2025 Data</title>
+    <title>MLB Game Bot</title>
     <link rel="stylesheet" href="style.css?v=3" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18,7 +18,7 @@
         <header>
             <div class="header-left">
                 <h1>MLB Game Bot Explorer</h1>
-                <p class="subtitle">2025 Regular Season & Postseason Data</p>
+                <p class="subtitle">Regular Season & Postseason Data</p>
             </div>
             <div class="header-controls">
                 <div class="date-picker-container">
@@ -34,11 +34,21 @@
                         </svg>
                     </button>
                 </div>
-                <button id="global-peek-btn" class="global-peek-btn" title="Toggle Scores" aria-label="Toggle Scores">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
+                
+                <div class="favorites-container">
+                    <button id="favorites-btn" class="action-btn" title="Favorites">
+                        <span class="btn-icon">❤️</span>
+                        <span class="btn-text">Favorite Teams</span>
+                    </button>
+                    <div id="favorites-menu" class="favorites-menu hidden">
+                        <h3>My Teams</h3>
+                        <div id="favorites-list" class="favorites-list"></div>
+                    </div>
+                </div>
+
+                <button id="global-peek-btn" class="action-btn" title="Toggle Scores" aria-label="Toggle Scores">
+                     <span class="btn-icon">🫣</span>
+                     <span class="btn-text">Show Scores</span>
                 </button>
             </div>
         </header>
@@ -46,11 +56,6 @@
         <!-- Pagination removed, replaced by date picker -->
 
       <main id="game-list">
-        <!-- Games for the selected date will be injected here -->
-        <div class="loader">
-          <div class="spinner"></div>
-          <p>Loading games...</p>
-        </div>
       </main>
 
         <template id="game-card-template">
