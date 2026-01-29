@@ -6,7 +6,9 @@ let dates = [];
 let currentDate = "";
 const favoritesManager = new FavoritesManager();
 
-const datePicker = document.getElementById("date-picker");
+const yearSelect = document.getElementById("year-select");
+const monthSelect = document.getElementById("month-select");
+const daySelect = document.getElementById("day-select");
 const globalPeekBtn = document.getElementById("global-peek-btn");
 const prevBtn = document.getElementById("prev-btn");
 const nextBtn = document.getElementById("next-btn");
@@ -97,7 +99,7 @@ async function init() {
   initFavoritesUI();
 
   try {
-    const response = await fetch("data/games.json");
+    const response = await fetch(`data/games.json?v=${new Date().getTime()}`);
     manifest = await response.json();
     dates = Object.keys(manifest).sort();
 
@@ -111,27 +113,92 @@ async function init() {
         currentDate = dateParam;
     }
     
-    // Set picker bounds (optional, but good UX)
-    if (dates.length > 0) {
-        datePicker.min = dates[0];
-        datePicker.max = dates[dates.length - 1];
-    }
 
-    updateUI();
+
+    populateDateSelectors();
+    await updateUI();
+    handleRouting();
 
     window.addEventListener('popstate', () => {
         const params = new URLSearchParams(window.location.search);
+        
+        // Handle Date Change
         const d = params.get('date');
-        if (d) {
+        if (d && d !== currentDate) {
             currentDate = d;
             updateUI(false);
         }
+        
+        // Handle Routing (Details vs List)
+        handleRouting();
     });
 
-    datePicker.addEventListener("change", (e) => {
-        currentDate = e.target.value;
-        updateUI(true);
-    });
+    function populateDateSelectors() {
+        // Populate Years
+        const years = new Set();
+        Object.keys(manifest).forEach(dateStr => {
+            years.add(dateStr.split('-')[0]);
+        });
+        const curY = currentDate ? currentDate.split('-')[0] : new Date().getFullYear().toString();
+        years.add(curY);
+        const sortedYears = Array.from(years).sort().reverse();
+        
+        yearSelect.innerHTML = '';
+        sortedYears.forEach(year => {
+            const opt = document.createElement('option');
+            opt.value = year;
+            opt.textContent = year;
+            yearSelect.appendChild(opt);
+        });
+
+        // Populate Months (Feb-Nov)
+        const months = [
+            { val: "02", name: "Feb" }, { val: "03", name: "Mar" }, 
+            { val: "04", name: "Apr" }, { val: "05", name: "May" }, 
+            { val: "06", name: "Jun" }, { val: "07", name: "Jul" }, 
+            { val: "08", name: "Aug" }, { val: "09", name: "Sep" }, 
+            { val: "10", name: "Oct" }, { val: "11", name: "Nov" }
+        ];
+        
+        monthSelect.innerHTML = '';
+        months.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.val;
+            opt.textContent = m.name;
+            monthSelect.appendChild(opt);
+        });
+
+        // Populate Days (1-31)
+        daySelect.innerHTML = '';
+        for (let i = 1; i <= 31; i++) {
+            const val = i.toString().padStart(2, '0');
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.textContent = i;
+            daySelect.appendChild(opt);
+        }
+    }
+
+    function handleDateSelectChange() {
+        const y = yearSelect.value;
+        const m = monthSelect.value;
+        const d = daySelect.value;
+        const newDate = `${y}-${m}-${d}`;
+        
+        // COMPLETELY REPLACE params: Create clean URL with only date
+        const url = new URL(window.location.origin + window.location.pathname);
+        url.searchParams.set('date', newDate);
+        
+        window.history.pushState({}, '', url);
+        currentDate = newDate;
+        
+        // Update list and ensure we are in List View
+        updateUI(false).then(() => handleRouting());
+    }
+
+    yearSelect.addEventListener("change", handleDateSelectChange);
+    monthSelect.addEventListener("change", handleDateSelectChange);
+    daySelect.addEventListener("change", handleDateSelectChange);
 
     prevBtn.addEventListener("click", () => {
         let target = null;
@@ -148,8 +215,11 @@ async function init() {
             }
         }
         if (target) {
+            const url = new URL(window.location.origin + window.location.pathname);
+            url.searchParams.set('date', target);
+            window.history.pushState({}, '', url);
             currentDate = target;
-            updateUI(true);
+            updateUI(false).then(() => handleRouting());
         }
     });
 
@@ -168,8 +238,11 @@ async function init() {
             }
         }
         if (target) {
+            const url = new URL(window.location.origin + window.location.pathname);
+            url.searchParams.set('date', target);
+            window.history.pushState({}, '', url);
             currentDate = target;
-            updateUI(true);
+            updateUI(false).then(() => handleRouting());
         }
     });
 
@@ -200,7 +273,13 @@ async function init() {
 
 async function updateUI(shouldPushState = false) {
   const date = currentDate;
-  datePicker.value = date;
+  
+  if (date) {
+      const [y, m, d] = date.split('-');
+      if (yearSelect && yearSelect.value !== y) yearSelect.value = y;
+      if (monthSelect && monthSelect.value !== m) monthSelect.value = m;
+      if (daySelect && daySelect.value !== d) daySelect.value = d;
+  }
 
   if (shouldPushState) {
       const url = new URL(window.location);
@@ -233,6 +312,8 @@ async function updateUI(shouldPushState = false) {
         // Feather file might have many rows (play-by-play),
         // but the last row usually has the final scores and scores for the game.
         const lastRow = data[data.length - 1];
+        // Attach filePath for detailed view
+        lastRow.filePath = file;
         gamesData.push(lastRow);
       }
     }
@@ -336,6 +417,15 @@ function renderGames(games) {
     // Actually let's keep it in the card but styled as "title".
     // We already set it above .series-description
     
+    // Separator Click -> Details
+    const separator = clone.querySelector(".matchup-separator");
+    separator.style.cursor = "pointer";
+    separator.title = "View Game Details";
+    separator.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openGameDetails(game);
+    });
+
     // Stagger animation
     const card = clone.querySelector(".game-card");
     card.style.animationDelay = `${index * 0.05}s`; // Faster stagger
@@ -352,5 +442,240 @@ function getGaugeClass(score) {
     if (score < 7.5) return 'gauge-tier-3';
     return 'gauge-tier-4';
 }
+
+// --- Routing & View Logic ---
+const detailsView = document.getElementById("game-details-view");
+const backBtn = document.getElementById("back-btn");
+const pbpBody = document.getElementById("play-by-play-body");
+const container = document.querySelector(".container header").parentNode; 
+
+const mainHeader = document.querySelector("header");
+const gameListSection = document.getElementById("game-list"); 
+
+function handleRouting() {
+    const params = new URLSearchParams(window.location.search);
+    const gamePk = params.get('gamePk');
+    
+    if (gamePk) {
+        showDetailsView(gamePk);
+    } else {
+        showListView();
+    }
+}
+
+function showListView() {
+    detailsView.classList.add("hidden");
+    // mainHeader.classList.remove("hidden"); // Navbar stays visible
+    gameListSection.classList.remove("hidden");
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+}
+
+async function showDetailsView(gamePk) {
+    // Hide List
+    // mainHeader.classList.add("hidden"); // Navbar stays visible
+    gameListSection.classList.add("hidden");
+    detailsView.classList.remove("hidden");
+    
+    let filePath = null;
+    let fallbackPath = `data/${currentDate.split('-')[0]}/${currentDate}-${gamePk}.ftr`;
+
+    // 1. Try current date
+    if (manifest[currentDate]) {
+        filePath = manifest[currentDate].find(p => p.includes(gamePk));
+    }
+    
+    // 2. Global Search in Manifest (if reload on different date or direct link)
+    if (!filePath) {
+        for (const dateKey in manifest) {
+            const found = manifest[dateKey].find(p => p.includes(gamePk));
+            if (found) {
+                filePath = found;
+                currentDate = dateKey; // Update current date context if found elsewhere
+                break;
+            }
+        }
+    }
+
+    if (!filePath) filePath = fallbackPath; 
+
+    await loadAndRenderDetails(filePath);
+}
+
+// Back Button
+backBtn.addEventListener("click", () => {
+    window.history.back();
+});
+
+// Scoring Toggle
+const scoreToggle = document.getElementById("score-plays-toggle");
+if (scoreToggle) {
+    scoreToggle.addEventListener("change", (e) => {
+        pbpBody.classList.toggle("show-scoring-only", e.target.checked);
+    });
+}
+
+async function loadAndRenderDetails(filePath) {
+    pbpBody.innerHTML = '<tr><td colspan="3" class="loader"><div class="spinner"></div></td></tr>';
+    
+    // Reset toggle state
+    if (scoreToggle) {
+        scoreToggle.checked = false;
+        pbpBody.classList.remove("show-scoring-only");
+    }
+
+    // Clear header
+    document.getElementById("details-home-team").textContent = "...";
+    document.getElementById("details-away-team").textContent = "...";
+    document.getElementById("details-meta").textContent = "";
+
+    try {
+        const rows = await loadFeather(filePath);
+        if (!rows || rows.length === 0) throw new Error("No data");
+
+        // Extract Meta
+        // Extract Meta
+        const metaRow = rows[rows.length - 1]; 
+        const firstRow = rows[0];
+        
+        const homeTeam = firstRow.homeTeam || metaRow.homeTeam || "Home";
+        const awayTeam = firstRow.awayTeam || metaRow.awayTeam || "Away";
+        
+        const homeScore = metaRow.homeScore !== undefined ? metaRow.homeScore : "--";
+        const awayScore = metaRow.awayScore !== undefined ? metaRow.awayScore : "--";
+        
+        // Update DOM
+        document.getElementById("details-home-team").textContent = homeTeam;
+        document.getElementById("details-away-team").textContent = awayTeam;
+
+        // Logos
+        const hLogo = document.getElementById("details-home-logo");
+        const aLogo = document.getElementById("details-away-logo");
+        if(hLogo) hLogo.src = `images/${homeTeam}.png`;
+        if(aLogo) aLogo.src = `images/${awayTeam}.png`;
+
+        // Scores
+        const hScoreEl = document.getElementById("details-home-score");
+        const aScoreEl = document.getElementById("details-away-score");
+        if(hScoreEl) hScoreEl.textContent = homeScore;
+        if(aScoreEl) aScoreEl.textContent = awayScore;
+        
+        const venue = firstRow.venue || "";
+        const desc = firstRow.gameDescription || "";
+        
+        document.getElementById("details-meta").textContent = `${desc} • ${venue}`;
+
+        renderPlayByPlay(rows);
+    } catch (e) {
+        console.error("Details error:", e);
+        pbpBody.innerHTML = `<tr><td colspan="3" class="error">Failed to load detailed data.</td></tr>`;
+    }
+}
+
+function renderPlayByPlay(rows) {
+    pbpBody.innerHTML = "";
+    
+    if (!rows || rows.length === 0) {
+        pbpBody.innerHTML = "<tr><td colspan='3'>No play-by-play data available.</td></tr>";
+        return;
+    }
+
+    const filters = [
+        "batter timeout",
+        "coaching visit",
+        "defensive substitution",
+        "defensive switch",
+        "end of",
+        "game advisory",
+        "injury delay",
+        "mound visit", 
+        "offensive substitution", 
+        "pitching change",
+        "pitching substitution", 
+        "scheduled",
+        "start of",
+        "status change", 
+        "video review",
+        "warmup",
+    ];
+
+    let prevHome = 0;
+    let prevAway = 0;
+    let firstRowRendered = false;
+
+    rows.forEach(row => {
+        if (!row) return;
+
+        // original text for display
+        const description = row.result || row.event || "";
+        
+        // AGGRESSIVE FILTER: Check ALL string values in the row
+        const rowValues = Object.values(row)
+            .filter(v => typeof v === 'string')
+            .map(v => v.toLowerCase());
+            
+        const shouldExclude = filters.some(f => 
+            rowValues.some(val => val.includes(f))
+        );
+        
+        if (shouldExclude) return;
+
+        const isTop = row.half === "top";
+        const arrow = isTop ? "▲" : "▼";
+        const inning = row.inning || "";
+        const home = row.homeScore || 0;
+        const away = row.awayScore || 0;
+        
+        const tr = document.createElement("tr");
+        
+        // Score Change Detection
+        // Only highlight if scores changed AND it's not the very first visual row (unless 0-0 changed to something else immediately? No usually starts 0-0)
+        // If row 1 is 1-0, highlight it? Yes maybe.
+        // Let's just compare to prev.
+        const scoreChanged = (home !== prevHome || away !== prevAway) && firstRowRendered;
+        const rowClass = scoreChanged ? "score-change" : "";
+        if (scoreChanged) tr.classList.add("score-change");
+
+        // Inning Column
+        const tdInning = document.createElement("td");
+        tdInning.className = "pbp-inning-cell";
+        tdInning.innerHTML = `<div class="inning-content"><span class="inning-arrow">${arrow}</span> ${inning}</div>`;
+        tr.appendChild(tdInning);
+
+        // Score Column
+        const tdScore = document.createElement("td");
+        tdScore.className = "pbp-score-cell";
+        tdScore.innerHTML = `<span class="score-box">${away}-${home}</span>`;
+        if (scoreChanged) tdScore.classList.add("score-change");
+        tr.appendChild(tdScore);
+
+        // Desc Column
+        const tdDesc = document.createElement("td");
+        tdDesc.className = "pbp-desc-cell";
+        tdDesc.textContent = description;
+        tr.appendChild(tdDesc);
+
+        pbpBody.appendChild(tr);
+
+        // Update tracking
+        prevHome = home;
+        prevAway = away;
+        firstRowRendered = true;
+    });
+}
+
+
+// Redirect old function call to routing
+window.openGameDetails = function(game) {
+    const pk = game.gamePk;
+    if (pk) {
+        // Reset search params to only include gamePk
+        const url = new URL(window.location.protocol + "//" + window.location.host + window.location.pathname);
+        url.searchParams.set('gamePk', pk);
+        
+        window.history.pushState({}, '', url);
+        handleRouting();
+    }
+};
 
 init();
