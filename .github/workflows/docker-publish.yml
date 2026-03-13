@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: ["main"]
+    paths:
+      - "Dockerfile"
+      - "backend/**"
 
 env:
   REGISTRY: ghcr.io
