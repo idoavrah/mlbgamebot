@@ -1,14 +1,13 @@
-FROM python:3.9-slim-buster
+FROM python:3.12-slim
 
 WORKDIR /app
 
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip install -r requirements.txt
+COPY backend/*.py ./backend/
 
-COPY mlbgamebot ./mlbgamebot
-COPY images ./images
+VOLUME ["/app/data"]
 
-USER 1001
-
-CMD ["python", "mlbgamebot/gamebot.py"]
+WORKDIR /app/backend
+CMD ["python3", "gamebot.py"]

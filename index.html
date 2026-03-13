@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MLB Game Bot</title>
+    <link rel="icon" type="image/png" href="images/baseball.png" />
+    <link rel="stylesheet" href="style.css?v=4" />
+    <link rel="stylesheet" href="images/sprites.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="dark-mode">
+    <header>
+        <div class="header-inner">
+            <div class="header-left">
+                <a href="/" class="title-link">
+                    <h1><span class="title-emoji"></span>⚾️</span> <span class="gradient-text">MLB Game Bot</span></h1>
+                </a>
+                <p class="subtitle">Regular Season & Postseason Data</p>
+            </div>
+            <div class="header-controls">
+                <div class="date-picker-container">
+                    <button id="prev-btn" class="nav-btn" title="Previous Day">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <div class="date-selector-group">
+                <select id="month-select" class="date-select" aria-label="Month"></select>
+                <select id="day-select" class="date-select" aria-label="Day"></select>
+                <select id="year-select" class="date-select" aria-label="Year"></select>
+            </div>
+                    <button id="next-btn" class="nav-btn" title="Next Day">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="favorites-container">
+                    <button id="favorites-btn" class="action-btn" title="Favorites">
+                        <span class="btn-icon">❤️</span>
+                        <span class="btn-text">Favorite Teams</span>
+                    </button>
+                    <div id="favorites-menu" class="favorites-menu hidden">
+                        <h3>My Teams</h3>
+                        <div id="favorites-list" class="favorites-list"></div>
+                    </div>
+                </div>
+
+                <button id="global-peek-btn" class="action-btn" title="Toggle Scores" aria-label="Toggle Scores">
+                    <span class="btn-icon">🫣</span>
+                    <span class="btn-text">Show Scores</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container main-content-area">
+      <main id="game-list">
+      </main>
+    </div>
+
+        <template id="game-card-template">
+            <div class="game-card">
+                
+                <div class="game-content">
+                    <!-- Home Team (Left) -->
+                    <div class="team-block home-block">
+                        <div class="logo-wrapper">
+                            <div class="team-sprite home-logo"></div>
+                            <div class="team-score home-score"></div>
+                        </div>
+                        <div class="team-name home-name"></div>
+                    </div>
+
+                    <!-- Center Separator -->
+                    <div class="matchup-separator">@</div>
+
+                    <!-- Away Team (Right) -->
+                    <div class="team-block away-block">
+                        <div class="logo-wrapper">
+                            <div class="team-sprite away-logo"></div>
+                            <div class="team-score away-score"></div>
+                        </div>
+                        <div class="team-name away-name"></div>
+                    </div>
+                </div>
+
+                <div class="game-meta">
+                    <div class="series-description"></div>
+                    <div class="game-info-text"></div>
+                    <div class="game-venue"></div>
+                </div>
+
+                <div class="game-metrics">
+                    <div class="metric">
+                        <span class="label">Thrill</span>
+                        <div class="gauge-wrapper">
+                            <div class="gauge-track">
+                                <div class="gauge-fill thrill-fill"></div>
+                            </div>
+                        </div>
+                        <span class="value thrill-value"></span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Offense</span>
+                        <div class="gauge-wrapper">
+                            <div class="gauge-track">
+                                <div class="gauge-fill offense-fill"></div>
+                            </div>
+                        </div>
+                        <span class="value offense-value"></span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Defense</span>
+                        <div class="gauge-wrapper">
+                            <div class="gauge-track">
+                                <div class="gauge-fill defense-fill"></div>
+                            </div>
+                        </div>
+                        <span class="value defense-value"></span>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+      <footer>
+        <p>Created with 🤖 by Ido Avraham &copy; 2026 MLB GameBot</p>
+      </footer>
+
+    <!-- Game Details View (Full Page) -->
+    <div id="game-details-view" class="details-view hidden">
+        <div class="details-container container">
+            <div class="details-nav">
+                <button id="back-btn" class="action-btn">
+                    <span class="btn-icon">←</span>
+                    <span class="btn-text">Back to Games</span>
+                </button>
+                
+                <div class="scoring-toggle-container">
+                    <label class="switch">
+                        <input type="checkbox" id="score-plays-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="toggle-label">Show scoring plays only</span>
+                </div>
+            </div>
+            
+            <div class="details-header-card">
+                <div class="details-matchup">
+                    <!-- Home -->
+                    <div class="details-team">
+                        <div id="details-home-logo" class="team-sprite details-logo"></div>
+                        <span id="details-home-team" class="details-team-name"></span>
+                    </div>
+
+                    <!-- Score / Meta -->
+                    <div class="details-center-block">
+                        <div class="details-score-display">
+                            <span id="details-home-score"></span>
+                            <span class="score-divider">-</span>
+                            <span id="details-away-score"></span>
+                        </div>
+                        <div id="details-meta" class="details-meta"></div>
+                    </div>
+
+                    <!-- Away -->
+                    <div class="details-team">
+                        <div id="details-away-logo" class="team-sprite details-logo"></div>
+                        <span id="details-away-team" class="details-team-name"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-content">
+                <h3>Play-by-Play</h3>
+                <div class="table-container">
+                    <table id="play-by-play-table" class="pbp-table">
+                        <tbody id="play-by-play-body">
+                            <!-- Rows injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js?v=2"></script>
+  </body>
+</html>
