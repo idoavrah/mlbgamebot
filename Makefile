@@ -1,16 +1,19 @@
-.PHONY: help parse parse-year parse-month parse-day run-website install sync-site-data migrate-manifest docker-build docker-push docker-run
+.PHONY: help parse parse-year parse-month parse-day run-website build-website clean install sync-site-data deploy-website migrate-manifest docker-build docker-push docker-run
+GCS_BUCKET := gs://mlb.idodo.dev
 
 # Default target
 help:
 	@echo "MLB Game Bot - Commands"
 	@echo "======================="
+	@echo "make clean                                   : Remove build artifacts (dist/)"
+	@echo "make install                                 : Install backend dependencies"
 	@echo "make parse                                   : Parse data for the defaults (Yesterday)"
 	@echo "make parse-year YEAR=2025                    : Parse data for a specific year"
 	@echo "make parse-month YEAR=2025 MONTH=10          : Parse data for a specific month"
 	@echo "make parse-day YEAR=2025 MONTH=10 DAY=04     : Parse data for a specific day"
 	@echo "make run-website                             : Run the website locally on port 8000"
-	@echo "make install                                 : Install backend dependencies"
-	@echo "make sync-site-data                          : Sync site files to GCS bucket (no overwrite)"
+	@echo "make build-website                           : Minify website assets into dist/"
+	@echo "make deploy-website                          : Robust sync of all site assets to GCS"
 	@echo "make docker-build                            : Build the Docker image"
 	@echo "make docker-push                             : Build and push image to Artifact Registry"
 	@echo "make docker-run                              : Run the Docker image locally with data mount"
@@ -40,6 +43,20 @@ run-website:
 	@echo "Starting local server at http://127.0.0.1:8000"
 	@python3 -m http.server 8000
 
+build-website: clean
+	@echo "Building website (minifying assets)..."
+	@mkdir -p dist/images
+	@npx -y terser app.js -o dist/app.js --compress --mangle
+	@npx -y terser favorites.js -o dist/favorites.js --compress --mangle
+	@npx -y clean-css-cli -o dist/style.css style.css
+	@npx -y html-minifier-terser --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace --use-short-doctype index.html -o dist/index.html
+	@cp -r images/* dist/images/
+	@echo "Build complete. Minified assets are in dist/"
+
+clean:
+	@echo "Cleaning up dist/..."
+	@rm -rf dist/
+
 # Migrate existing games.json into per-day summary FTRs + index.json
 migrate-manifest:
 	@echo "Migrating manifest..."
@@ -49,14 +66,9 @@ migrate-manifest:
 install:
 	@pip3 install -r requirements.txt
 
-# Sync site data to GCS bucket (last 15m)
-GCS_BUCKET := gs://mlb.idodo.dev
-sync-site-data:
-	@echo "Syncing site data changed in the last 15 minutes to $(GCS_BUCKET)..."
-	@find index.html style.css app.js favorites.js images data \
-		-type f -mmin -15 \
-		-exec gcloud storage cp {} $(GCS_BUCKET)/{} \;
-	@echo "Sync complete."
+deploy-website:
+	@echo "Deploying website to $(GCS_BUCKET)..."
+	@./scripts/deploy-website.sh --bucket $(GCS_BUCKET) $(if $(DRY_RUN),--dry-run,)
 
 # Docker
 IMAGE_URI := me-west1-docker.pkg.dev/ido-infrastructure/mlbgamebot/mlbgamebot:1.0.3
