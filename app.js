@@ -1,4 +1,4 @@
-import { tableFromIPC } from "https://cdn.jsdelivr.net/npm/apache-arrow@18.0.0/+esm";
+import { tableFromIPC } from "apache-arrow";
 import { FavoritesManager } from "./favorites.js";
 
 let dates = [];

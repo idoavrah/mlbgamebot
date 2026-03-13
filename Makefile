@@ -18,6 +18,14 @@ help:
 	@echo "make docker-push                             : Build and push image to Artifact Registry"
 	@echo "make docker-run                              : Run the Docker image locally with data mount"
 
+clean:
+	@echo "Cleaning up dist/..."
+	@rm -rf dist/
+
+# Install dependencies
+install:
+	@pip3 install -r requirements.txt
+
 # Default parse (Yesterday)
 parse:
 	@echo "Parsing default (Yesterday)..."
@@ -50,25 +58,18 @@ build-website: clean
 	@npx -y terser favorites.js -o dist/favorites.js --compress --mangle
 	@npx -y clean-css-cli -o dist/style.css style.css
 	@npx -y html-minifier-terser --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace --use-short-doctype index.html -o dist/index.html
+	@npx -y html-minifier-terser --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace --use-short-doctype privacy.html -o dist/privacy.html
 	@cp -r images/* dist/images/
 	@echo "Build complete. Minified assets are in dist/"
 
-clean:
-	@echo "Cleaning up dist/..."
-	@rm -rf dist/
+deploy-website:
+	@echo "Deploying website to $(GCS_BUCKET)..."
+	@./scripts/deploy-website.sh --bucket $(GCS_BUCKET) $(if $(DRY_RUN),--dry-run,)
 
 # Migrate existing games.json into per-day summary FTRs + index.json
 migrate-manifest:
 	@echo "Migrating manifest..."
 	@python3 backend/migrate_manifest.py
-
-# Install dependencies
-install:
-	@pip3 install -r requirements.txt
-
-deploy-website:
-	@echo "Deploying website to $(GCS_BUCKET)..."
-	@./scripts/deploy-website.sh --bucket $(GCS_BUCKET) $(if $(DRY_RUN),--dry-run,)
 
 # Docker
 IMAGE_URI := me-west1-docker.pkg.dev/ido-infrastructure/mlbgamebot/mlbgamebot:1.0.3

@@ -23,6 +23,20 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://static.cloudflareinsights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://www.google-analytics.com https://stats.g.doubleclick.net https://cdn.jsdelivr.net; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com;"
+    />
+    <script type="importmap">
+    {
+      "imports": {
+        "apache-arrow": "https://cdn.jsdelivr.net/npm/apache-arrow@18.0.0/+esm"
+      },
+      "integrity": {
+        "https://cdn.jsdelivr.net/npm/apache-arrow@18.0.0/+esm": "sha384-DIr24PqtYamtooGUU5a81NK+sPtMGW2bzDyV6+LzNXS72q3f8yTMp6xKMC1EXFhH"
+      }
+    }
+    </script>
   </head>
   <body class="dark-mode">
     <header>
@@ -141,7 +155,7 @@
         </template>
 
       <footer>
-        <p>Created with 🤖 by Ido Avraham &copy; 2026 MLB GameBot</p>
+        <p>Created with 🤖 by Ido Avraham &copy; 2026 MLB GameBot • <a href="privacy.html">Privacy Policy</a></p>
       </footer>
 
     <!-- Game Details View (Full Page) -->

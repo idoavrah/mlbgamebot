@@ -25,7 +25,7 @@ fi
 echo "Deploying to $BUCKET..."
 
 echo "Syncing root static assets from $SOURCE_ROOT..."
-for file in index.html style.css app.js favorites.js; do
+for file in index.html style.css app.js favorites.js privacy.html; do
     if [ -f "$SOURCE_ROOT/$file" ]; then
         echo "Processing $file..."
         if [ "$DRY_RUN" = true ]; then
