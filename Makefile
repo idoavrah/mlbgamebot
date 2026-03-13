@@ -1,4 +1,4 @@
-.PHONY: help parse parse-year parse-month parse-day run-website install sync-site-data docker-build docker-push docker-run
+.PHONY: help parse parse-year parse-month parse-day run-website install sync-site-data migrate-manifest docker-build docker-push docker-run
 
 # Default target
 help:
@@ -37,8 +37,13 @@ parse-day:
 
 # Run the website
 run-website:
-	@echo "Starting local server at http://localhost:8000"
+	@echo "Starting local server at http://127.0.0.1:8000"
 	@python3 -m http.server 8000
+
+# Migrate existing games.json into per-day summary FTRs + index.json
+migrate-manifest:
+	@echo "Migrating manifest..."
+	@python3 backend/migrate_manifest.py
 
 # Install dependencies
 install:
@@ -50,7 +55,6 @@ sync-site-data:
 	@echo "Syncing site data changed in the last 15 minutes to $(GCS_BUCKET)..."
 	@find index.html style.css app.js favorites.js images data \
 		-type f -mmin -15 \
-		! \( -name "*.json" ! -name "games.json" \) \
 		-exec gcloud storage cp {} $(GCS_BUCKET)/{} \;
 	@echo "Sync complete."
 

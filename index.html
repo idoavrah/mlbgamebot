@@ -4,7 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MLB Game Bot</title>
+    <link rel="icon" type="image/png" href="images/baseball.png" />
     <link rel="stylesheet" href="style.css?v=4" />
+    <link rel="stylesheet" href="images/sprites.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -13,9 +15,8 @@
     />
   </head>
   <body class="dark-mode">
-    <div class="container">
-    <div class="container">
-        <header>
+    <header>
+        <div class="header-inner">
             <div class="header-left">
                 <a href="/" class="title-link">
                     <h1><span class="title-emoji"></span>⚾️</span> <span class="gradient-text">MLB Game Bot</span></h1>
@@ -53,16 +54,17 @@
                 </div>
 
                 <button id="global-peek-btn" class="action-btn" title="Toggle Scores" aria-label="Toggle Scores">
-                     <span class="btn-icon">🫣</span>
-                     <span class="btn-text">Show Scores</span>
+                    <span class="btn-icon">🫣</span>
+                    <span class="btn-text">Show Scores</span>
                 </button>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <!-- Pagination removed, replaced by date picker -->
-
+    <div class="container main-content-area">
       <main id="game-list">
       </main>
+    </div>
 
         <template id="game-card-template">
             <div class="game-card">
@@ -71,7 +73,7 @@
                     <!-- Home Team (Left) -->
                     <div class="team-block home-block">
                         <div class="logo-wrapper">
-                            <img class="team-logo home-logo" src="" alt="Home Team">
+                            <div class="team-sprite home-logo"></div>
                             <div class="team-score home-score"></div>
                         </div>
                         <div class="team-name home-name"></div>
@@ -83,7 +85,7 @@
                     <!-- Away Team (Right) -->
                     <div class="team-block away-block">
                         <div class="logo-wrapper">
-                            <img class="team-logo away-logo" src="" alt="Away Team">
+                            <div class="team-sprite away-logo"></div>
                             <div class="team-score away-score"></div>
                         </div>
                         <div class="team-name away-name"></div>
@@ -129,9 +131,9 @@
         </template>
 
       <footer>
-        <p>&copy; 2026 MLB Game Bot Details</p>
+        <p>Created with 🤖 by Ido Avraham &copy; 2026 MLB GameBot</p>
       </footer>
-    </div>
+
     <!-- Game Details View (Full Page) -->
     <div id="game-details-view" class="details-view hidden">
         <div class="details-container container">
@@ -154,7 +156,7 @@
                 <div class="details-matchup">
                     <!-- Home -->
                     <div class="details-team">
-                        <img id="details-home-logo" src="" alt="" class="details-logo">
+                        <div id="details-home-logo" class="team-sprite details-logo"></div>
                         <span id="details-home-team" class="details-team-name"></span>
                     </div>
 
@@ -165,12 +167,12 @@
                             <span class="score-divider">-</span>
                             <span id="details-away-score"></span>
                         </div>
-                        <div class="details-meta" id="details-meta"></div>
+                        <div id="details-meta" class="details-meta"></div>
                     </div>
 
                     <!-- Away -->
                     <div class="details-team">
-                        <img id="details-away-logo" src="" alt="" class="details-logo">
+                        <div id="details-away-logo" class="team-sprite details-logo"></div>
                         <span id="details-away-team" class="details-team-name"></span>
                     </div>
                 </div>
@@ -189,6 +191,6 @@
         </div>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script type="module" src="app.js?v=2"></script>
   </body>
 </html>

@@ -1,0 +1,44 @@
+/* Auto-generated Spitesheet CSS (Retina Optimized) */
+.team-sprite {
+  display: inline-block;
+  width: 64px;
+  height: 64px;
+  background-image: url('spritesheet.png');
+  background-repeat: no-repeat;
+  background-size: 640px 256px;
+  vertical-align: middle;
+}
+
+.sprite-Arizona-Diamondbacks { background-position: -0px -0px; }
+.sprite-Athletics { background-position: -64px -0px; }
+.sprite-Atlanta-Braves { background-position: -128px -0px; }
+.sprite-Baltimore-Orioles { background-position: -192px -0px; }
+.sprite-Boston-Red-Sox { background-position: -256px -0px; }
+.sprite-Chicago-Cubs { background-position: -320px -0px; }
+.sprite-Chicago-White-Sox { background-position: -384px -0px; }
+.sprite-Cincinnati-Reds { background-position: -448px -0px; }
+.sprite-Cleveland-Guardians { background-position: -512px -0px; }
+.sprite-Cleveland-Indians { background-position: -576px -0px; }
+.sprite-Colorado-Rockies { background-position: -0px -64px; }
+.sprite-Detroit-Tigers { background-position: -64px -64px; }
+.sprite-Houston-Astros { background-position: -128px -64px; }
+.sprite-Kansas-City-Royals { background-position: -192px -64px; }
+.sprite-Los-Angeles-Angels { background-position: -256px -64px; }
+.sprite-Los-Angeles-Dodgers { background-position: -320px -64px; }
+.sprite-Miami-Marlins { background-position: -384px -64px; }
+.sprite-Milwaukee-Brewers { background-position: -448px -64px; }
+.sprite-Minnesota-Twins { background-position: -512px -64px; }
+.sprite-New-York-Mets { background-position: -576px -64px; }
+.sprite-New-York-Yankees { background-position: -0px -128px; }
+.sprite-Oakland-Athletics { background-position: -64px -128px; }
+.sprite-Philadelphia-Phillies { background-position: -128px -128px; }
+.sprite-Pittsburgh-Pirates { background-position: -192px -128px; }
+.sprite-San-Diego-Padres { background-position: -256px -128px; }
+.sprite-San-Francisco-Giants { background-position: -320px -128px; }
+.sprite-Seattle-Mariners { background-position: -384px -128px; }
+.sprite-St.-Louis-Cardinals { background-position: -448px -128px; }
+.sprite-Tampa-Bay-Rays { background-position: -512px -128px; }
+.sprite-Texas-Rangers { background-position: -576px -128px; }
+.sprite-Toronto-Blue-Jays { background-position: -0px -192px; }
+.sprite-Washington-Nationals { background-position: -64px -192px; }
+.sprite-baseball { background-position: -128px -192px; }

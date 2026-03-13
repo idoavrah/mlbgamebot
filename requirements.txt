@@ -9,3 +9,4 @@ aiohttp
 backoff
 pytz
 pyarrow
+Pillow
