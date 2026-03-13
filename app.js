@@ -97,6 +97,15 @@ function initFavoritesUI() {
       favoritesManager.toggleFavorite(team);
       checkbox.checked = favoritesManager.isFavorite(team); // Ensure state
       updateFavoritesBtnState();
+      
+      // GA Event
+      if (typeof gtag === 'function') {
+        gtag('event', 'toggle_favorite', {
+          'team_name': team,
+          'is_favorite': checkbox.checked
+        });
+      }
+
       // Re-render games if we are viewing them to update sort order
       updateUI(false);
     };
@@ -244,6 +253,11 @@ async function init() {
       const d = daySelect.value;
       const newDate = `${y}-${m}-${d}`;
 
+      // GA Event
+      if (typeof gtag === 'function') {
+        gtag('event', 'select_date', { 'date': newDate });
+      }
+
       // COMPLETELY REPLACE params: Create clean URL with only date
       const url = new URL(window.location.origin + window.location.pathname);
       url.searchParams.set("date", newDate);
@@ -309,6 +323,10 @@ async function init() {
     const reveal = () => {
       document.body.classList.add("show-scores");
       globalPeekBtn.classList.add("active");
+      
+      if (typeof gtag === 'function') {
+        gtag('event', 'peek_scores', { 'action': 'start' });
+      }
     };
     const hide = () => {
       document.body.classList.remove("show-scores");
@@ -541,6 +559,14 @@ function showListView() {
   mainContentArea.classList.remove("hidden");
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
+
+  // SPA Page View
+  if (typeof gtag === 'function') {
+    gtag('config', 'G-00JMY1B96C', {
+      'page_path': window.location.pathname + window.location.search,
+      'page_title': 'Game List'
+    });
+  }
 }
 
 async function showDetailsView(gamePk) {
@@ -548,6 +574,14 @@ async function showDetailsView(gamePk) {
   detailsView.classList.remove("hidden");
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
+
+  // SPA Page View
+  if (typeof gtag === 'function') {
+    gtag('config', 'G-00JMY1B96C', {
+      'page_path': window.location.pathname + window.location.search,
+      'page_title': 'Game Details'
+    });
+  }
 
   let filePath = null;
 
@@ -585,6 +619,9 @@ async function showDetailsView(gamePk) {
 
 // Back Button
 backBtn.addEventListener("click", () => {
+  if (typeof gtag === 'function') {
+    gtag('event', 'navigate_back', { 'from': 'game_details' });
+  }
   window.history.back();
 });
 
@@ -758,6 +795,14 @@ function renderPlayByPlay(rows) {
 window.openGameDetails = function (game) {
   const pk = game.gamePk;
   if (pk) {
+    if (typeof gtag === 'function') {
+      gtag('event', 'select_game', {
+        'game_pk': pk,
+        'home_team': game.homeTeam,
+        'away_team': game.awayTeam
+      });
+    }
+
     // Reset search params to only include gamePk
     const url = new URL(
       window.location.protocol +
