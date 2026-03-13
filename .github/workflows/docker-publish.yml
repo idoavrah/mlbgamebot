@@ -1,4 +1,4 @@
-name: Build and push
+name: Build and push Docker image
 
 on:
   workflow_dispatch:
@@ -31,10 +31,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,format=long
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Build and push Docker image
         id: build-and-push
         uses: docker/build-push-action@v7
         with:
           context: .
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          platforms: linux/amd64,linux/arm64
           push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
