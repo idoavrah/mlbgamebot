@@ -28,6 +28,7 @@ async def start():
     global fromdate, todate
 
     filename = ''
+    update_manifest = False
 
     for d in pd.date_range(fromdate, todate):
 
@@ -123,15 +124,18 @@ async def start():
 
                         gamedate = datetime.date(year, month, day)
 
-                        # Output to data folder, grouped by year
-                        # ../data/{year}/{filename}
-                        
                         target_dir = f'../data/{year}'
                         filename = f'{target_dir}/{year}-{month:02d}-{day:02d}-{gamepk}.ftr'
-                        
+
+                        if os.path.isfile(filename):
+                            logger.debug(f"Skipping {filename} (already parsed)")
+                            continue
+
                         os.makedirs(os.path.dirname(filename), exist_ok=True)
                         feather.write_feather(gameDF, filename, compression='uncompressed')
 
+                        logger.info(f"Wrote {filename}")
+                        update_manifest = True
 
         except Exception as e:
             logger.error(e)
@@ -141,7 +145,9 @@ async def start():
     # Generate manifest
     # We need to scan the output directory for all generated Feather files
     # Output directory is ../data/{year}
-    
+    if not update_manifest:
+        return
+        
     manifest = {}
     # Glob patterns are relative to CWD of script?
     # If running in backend/, we look in ../data/
@@ -172,8 +178,6 @@ async def start():
         json.dump(manifest, f)
         
     logger.info(f"Generated manifest with {len(files)} games")
-
-
 
 logger.info('Loaded parse')
 

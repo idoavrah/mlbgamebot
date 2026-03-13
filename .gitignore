@@ -106,5 +106,4 @@ venv.bak/
 
 # Project specifics
 # Ignore intermediate JSON data used for generation
-data/schedule/
-data/games/
+data/

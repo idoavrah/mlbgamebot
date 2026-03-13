@@ -7,3 +7,5 @@ jsonpath-ng
 feather-format
 aiohttp
 backoff
+pytz
+pyarrow
