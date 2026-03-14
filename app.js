@@ -449,8 +449,16 @@ function renderGames(games) {
     const seriesDesc = game.seriesDescription || "Regular Season";
     clone.querySelector(".series-description").textContent = seriesDesc;
 
-    clone.querySelector(".game-info-text").textContent =
-      game.gameDescription || "";
+    const descText = game.gameDescription || "";
+    const infoTextEl = clone.querySelector(".game-info-text");
+    if (descText === "None" || !descText) {
+      infoTextEl.innerHTML = "&nbsp;"; // Maintain line height so layout doesn't shift
+      infoTextEl.style.visibility = "hidden";
+    } else {
+      infoTextEl.textContent = descText;
+      infoTextEl.style.visibility = "visible";
+    }
+
     clone.querySelector(".game-venue").textContent = game.venue || "";
 
     // Home Team Data
@@ -646,7 +654,6 @@ async function loadAndRenderDetails(filePath) {
   // Clear header
   document.getElementById("details-home-team").textContent = "...";
   document.getElementById("details-away-team").textContent = "...";
-  document.getElementById("details-meta").textContent = "";
 
   try {
     const rows = await loadFeather(filePath);
@@ -687,8 +694,6 @@ async function loadAndRenderDetails(filePath) {
 
     const venue = firstRow.venue || "";
     const desc = firstRow.gameDescription || "";
-
-    document.getElementById("details-meta").textContent = `${desc} • ${venue}`;
 
     renderPlayByPlay(rows);
   } catch (e) {

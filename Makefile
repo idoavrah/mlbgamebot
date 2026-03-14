@@ -62,14 +62,9 @@ build-website: clean
 	@cp -r images/* dist/images/
 	@echo "Build complete. Minified assets are in dist/"
 
-deploy-website:
+deploy-website: build-website
 	@echo "Deploying website to $(GCS_BUCKET)..."
 	@./scripts/deploy-website.sh --bucket $(GCS_BUCKET) $(if $(DRY_RUN),--dry-run,)
-
-# Migrate existing games.json into per-day summary FTRs + index.json
-migrate-manifest:
-	@echo "Migrating manifest..."
-	@python3 backend/migrate_manifest.py
 
 # Docker
 IMAGE_URI := me-west1-docker.pkg.dev/ido-infrastructure/mlbgamebot/mlbgamebot:1.0.3

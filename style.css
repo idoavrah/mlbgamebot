@@ -256,7 +256,6 @@ header {
 .series-description {
   font-size: 0.75rem;
   color: var(--text-secondary);
-  text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.8rem;
   font-weight: 600;
@@ -373,7 +372,6 @@ body.show-scores .team-score {
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--accent-color);
-  text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0;
 }
@@ -746,7 +744,6 @@ tbody.show-scoring-only tr:not(.score-change) {
     font-size: 1.6rem;
     color: var(--text-secondary);
     font-weight: 800;
-    text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
@@ -780,14 +777,7 @@ tbody.show-scoring-only tr:not(.score-change) {
   font-weight: 300;
 }
 
-.details-meta {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  text-align: center;
-}
+
 
 @media (max-width: 600px) {
   .details-matchup { gap: 1rem; }
@@ -900,4 +890,101 @@ tbody.show-scoring-only tr:not(.score-change) {
   display: none !important;
 }
 
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  header {
+    padding: 1rem;
+  }
 
+  .header-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .header-controls {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.8rem;
+  }
+  
+  .date-picker-container {
+    width: 100%;
+    justify-content: space-between;
+    padding: 8px 16px;
+  }
+  
+  .date-selector-group {
+    flex-grow: 1;
+    justify-content: center;
+  }
+  
+  .favorites-container {
+    width: 100%;
+  }
+  
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
+  }
+  
+  .favorites-menu {
+    width: 100%;
+    right: auto;
+    left: 0;
+  }
+  
+  /* Game Details View Adjustments */
+  .details-view {
+    padding: 0 0.5rem;
+  }
+  
+  .details-nav {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .details-header-card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+  }
+  
+  .details-content h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .pbp-table td {
+    padding: 0.6rem 0.3rem;
+    font-size: 0.85rem;
+  }
+  
+  .pbp-inning-cell {
+    width: 50px;
+  }
+  
+  .pbp-score-cell {
+    width: 60px;
+  }
+
+  /* Hide elements on mobile */
+  #global-peek-btn,
+  .game-venue,
+  .details-meta {
+    display: none !important;
+  }
+
+  /* Equalize team name fonts in details view */
+  .details-team-name .name-l1,
+  .details-team-name .name-l2 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: 0;
+  }
+}
